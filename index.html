@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🚦Feu de Nuit Animé</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      overflow: hidden;
+      background: #0d1b2a;
+    }
+
+    /* ciel animé avec étoiles et lune */
+    .sky {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at bottom, #1b263b 0%, #0d1b2a 100%);
+      z-index: -3;
+    }
+    .star {
+      position: absolute;
+      background: white; border-radius: 50%;
+      opacity: 0.8; animation: twinkle 2s infinite ease-in-out;
+    }
+    @keyframes twinkle {
+      0%,100%{opacity:0.3; transform: scale(1);}
+      50%{opacity:1; transform: scale(1.3);}
+    }
+
+    .moon {
+      position: absolute;
+      top: 10%;
+      right: 15%;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at center, #f5f3ce, #cfc99c);
+      border-radius: 50%;
+      box-shadow: 0 0 50px rgba(245,243,206,0.7);
+      animation: bob 8s infinite ease-in-out;
+      z-index: -2;
+    }
+    @keyframes bob {
+      0%,100%{transform: translateY(0);}
+      50%{transform: translateY(20px);}
+    }
+
+    /* glow urbain */
+    .glow {
+      position: absolute;
+      bottom: 0; width: 200%;
+      height: 200px;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.05), transparent);
+      animation: moveGlow 12s infinite linear;
+      z-index: -1;
+    }
+    @keyframes moveGlow {
+      0%{transform: translateX(-50%);}
+      100%{transform: translateX(50%);}
+    }
+
+    .palm {
+      position: fixed; bottom: 0;
+      width: 100%; height: 150px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/e/e4/Palm_silhouette.svg') repeat-x bottom;
+      background-size: 120px auto;
+      opacity: 0.2; z-index: -1;
+    }
+
+    /* route et voitures */
+    .road {
+      position: absolute;
+      bottom: 0; width: 100%;
+      height: 200px; background: #333;
+      z-index: -0.5;
+    }
+    .road:before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 0;
+      width: 100%; height: 4px;
+      background: yellow;
+      filter: blur(1px);
+    }
+    .car {
+      position: absolute;
+      bottom: 20px;
+      width: 60px; height: 30px;
+      background: red;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      animation: drive 6s infinite linear;
+    }
+    @keyframes drive {
+      0% {left: -70px;}
+      100% {left: 100%;}
+    }
+
+    /* container principal */
+    .container {
+      position: relative;
+      text-align: center;
+      margin: 60px auto;
+      width: 450px;
+      background: rgba(255,255,255,0.08);
+      padding: 30px;
+      border-radius: 16px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      z-index: 1;
+    }
+    h1 { margin-bottom: 20px; }
+
+    /* feu style américain horizontal */
+    .traffic-light {
+      position: relative;
+      width: 220px; height: 80px;
+      margin: 0 auto 30px;
+      background: #222;
+      border: 6px solid #555;
+      border-radius: 12px;
+      display: flex;
+      align-items: center; justify-content: space-around;
+    }
+    .light {
+      width: 50px; height: 50px;
+      background: #444;
+      border: 4px solid #000;
+      border-radius: 50%;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .red.on { background:red; box-shadow:0 0 20px #e74c3c; }
+    .orange.on { background:orange; box-shadow:0 0 20px rgb(255,187,60); }
+    .green.on { background:limegreen; box-shadow:0 0 20px rgb(88,255,88); }
+
+    .status-box {
+      background: rgba(255,255,255,0.1);
+      padding: 15px; border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .buttons button {
+      margin:5px; padding:10px 20px;
+      font-size:14px;border:none;border-radius:6px;
+      cursor:pointer; transition:0.2s;
+    }
+    #startBtn {background:#2196f3;color:white;}
+    #stopBtn {background:#f44336;color:white;}
+    #resetBtn {background:#607d8b;color:white;}
+    .buttons button:hover {opacity:0.9;}
+  </style>
+</head>
+<body>
+  <div class="sky" id="sky"></div>
+  <div class="moon"></div>
+  <div class="glow"></div>
+  <div class="palm"></div>
+  <div class="road"></div>
+
+  <!-- voitures -->
+  <div class="car" style="animation-delay: -2s;"></div>
+  <div class="car" style="bottom: 50px; background: blue; animation-duration: 8s; animation-delay: -4s;"></div>
+
+  <div class="container">
+    <h1>Feu de Circulation</h1>
+    <div class="traffic-light">
+      <div class="light red"></div>
+      <div class="light orange"></div>
+      <div class="light green"></div>
+    </div>
+    <div class="status-box">
+      <p><strong>État actuel :</strong> <span id="etat">🔴 Rouge - STOP</span></p>
+      <p>Temps restant : <span id="timer">--</span> secondes</p>
+    </div>
+    <div class="buttons">
+      <button id="startBtn">Démarrer</button>
+      <button id="stopBtn">Arrêter</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    // script du feu
+    const lights = {
+      red: document.querySelector('.red'),
+      orange: document.querySelector('.orange'),
+      green: document.querySelector('.green'),
+    };
+    const etat = document.getElementById('etat');
+    const timer = document.getElementById('timer');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    let intervalId, current=0, timeLeft=3;
+    const phases = [
+      { color: 'red', text: '🔴 Rouge - STOP', duration: 3 },
+      { color: 'green', text: '🟢 Vert - GO', duration: 4 },
+      { color: 'orange', text: '🟠 Orange - ATTENTION', duration: 2 },
+    ];
+    function updateLight(){
+      Object.values(lights).forEach(l=>l.classList.remove('on'));
+      lights[phases[current].color].classList.add('on');
+      etat.textContent = phases[current].text;
+      timeLeft = phases[current].duration; timer.textContent = timeLeft;
+    }
+    function startCycle(){
+      updateLight();
+      intervalId = setInterval(()=>{
+        timeLeft--; timer.textContent = timeLeft;
+        if(timeLeft<=0){ current=(current+1)%phases.length; updateLight(); }
+      },1000);
+    }
+    function stopCycle(){ clearInterval(intervalId); }
+    function resetCycle(){ stopCycle(); current=0; updateLight(); }
+    startBtn.addEventListener('click', ()=>{ stopCycle(); startCycle(); });
+    stopBtn.addEventListener('click', stopCycle);
+    resetBtn.addEventListener('click', resetCycle);
+    updateLight();
+
+    // générer étoiles
+    const sky = document.getElementById('sky');
+    for(let i=0;i<120;i++){
+      const star = document.createElement('div');
+      star.classList.add('star');
+      const size = Math.random()*2+1;
+      star.style.width = size+'px';
+      star.style.height = size+'px';
+      star.style.top = Math.random()*100+'%';
+      star.style.left = Math.random()*100+'%';
+      star.style.animationDuration = Math.random()*3+2+'s';
+      sky.appendChild(star);
+    }
+  </script>
+</body>
+</html>
